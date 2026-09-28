@@ -1,0 +1,7 @@
+__pycache__/
+.pytest_cache/
+# Stockfish binary: download separately (see README)
+bin/
+# Search output: checkpoints, trees, logs
+runs/
+*.ckpt

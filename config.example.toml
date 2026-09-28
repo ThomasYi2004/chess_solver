@@ -1,0 +1,62 @@
+# Example solver configuration. Every key is optional; omitted keys use the
+# defaults in chess_solver/config.py. Use "none" to disable an optional value.
+# Any key can also be overridden on the CLI: --set leaf.win_threshold=150
+#
+# Units of thresholds and margins follow leaf.metric (White's point of view):
+#   cp          centipawns (100 = one pawn)
+#   win_prob    engine's probability that White wins, 0..1
+#   expectation engine's expected score for White (W + D/2), 0..1
+
+[engine]
+path = "bin/stockfish"
+threads = 8
+hash_mb = 2048
+depth = 10          # per engine call; also: nodes = 1000000, time = 0.5
+white_depth = "none"  # depth of the MultiPV search at White / Black nodes;
+black_depth = 8       # "none" = depth. Black nodes analyse every reply, so a
+                      # lower black_depth is the main speed knob.
+# options = { SyzygyPath = "/path/to/syzygy" }   # any extra UCI options
+
+[leaf]
+metric = "cp"
+win_threshold = 100     # eval >= +1.00 -> treated as a White win
+loss_threshold = 0      # eval <= 0.00 -> treated as "White does not win"
+min_ply = 0             # ignore eval cutoffs before this ply
+repetition_count = 2    # repeated position -> "White does not win" (0 = off)
+# No progress: eval not at least progress_min_gain higher than progress_window
+# plies (even number) earlier -> "White does not win". 0 = off.
+progress_window = 8
+progress_min_gain = 10
+
+[moves]
+# White: only moves within 0.30 of White's best, at most 2.
+white_margin = 30
+white_max_moves = 2
+# Black: every reply within 1.50 of Black's best. Replies outside the margin
+# are ASSUMED to lose for Black - this is the unsound direction.
+black_margin = 150
+black_max_moves = "none"
+white_multipv = "none"  # none = white_max_moves, or all legal moves if a margin is set
+black_multipv = "none"
+child_eval = "multipv"  # or "separate": fresh engine search on each new child
+
+[search]
+# fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+moves = []              # UCI moves applied to fen first, e.g. ["e2e4", "e7e5"]
+max_nodes = 100000
+max_seconds = "none"
+max_ply = 40            # unresolved nodes at this ply count as "White does not win"
+log_every = 100
+
+# Leaf verifiers get a second look at eval cutoffs and can veto them.
+# None are implemented yet; see chess_solver/verify.py for how to add one.
+# [[verify.leaf_verifiers]]
+# name = "lookahead"
+# apply_to = ["win"]
+# plies = 20
+
+[output]
+print_depth = 6
+# tree_json = "tree.json"
+# checkpoint = "run.ckpt"       # saved periodically and on exit; --resume run.ckpt
+checkpoint_every_seconds = 300
